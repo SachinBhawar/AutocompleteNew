@@ -46,3 +46,12 @@ Each product contains:
 3. Clicking on a suggestion displays the selected product (or products) with details like title, price, description, etc.
 
 ---
+## 🌐 Live Demo
+
+🔗 [https://autocomplete-new.vercel.app](https://autocomplete-new.vercel.app)
+
+---
+
+## 🤝 Contributing
+
+Feel free to fork this project and suggest improvements or new features via pull requests.
