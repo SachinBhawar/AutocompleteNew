@@ -1,12 +1,48 @@
-# React + Vite
+# 🔍 Autocomplete Search in React
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a React-based Autocomplete project that provides real-time search suggestions from a product dataset. Users can search using **title**, **description**, **tags**, and **category**, and view relevant product details by selecting a suggestion.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## Expanding the ESLint configuration
+- ✅ Live search suggestions as you type
+- ✅ Matches based on multiple fields: title, description, tags, category
+- ✅ Renders product info dynamically on selection
+- ✅ Clean and responsive UI
+- ✅ Powered by [DummyJSON Products API](https://dummyjson.com/products)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🛠 Tech Stack
+
+- **React**
+- **JavaScript (ES6+)**
+- **CSS / Tailwind CSS** (if applicable)
+- **Fetch API** for retrieving data
+
+---
+
+## 📦 API Used
+
+- [https://dummyjson.com/products](https://dummyjson.com/products)
+
+Each product contains:
+- `title`
+- `description`
+- `price`
+- `category`
+- `tags`
+- `thumbnail` and `images`
+
+---
+
+## 🧠 How It Works
+
+1. On initial load, product data is fetched and stored in state.
+2. As the user types in the search bar:
+   - Suggestions are filtered in real-time based on multiple fields.
+   - Matching results are shown as a dropdown list.
+3. Clicking on a suggestion displays the selected product (or products) with details like title, price, description, etc.
+
+---
