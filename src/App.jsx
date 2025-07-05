@@ -155,6 +155,7 @@ function App() {
                         onChange={handleInput}
                         onKeyDown={handleKeyDown}
                         placeholder="Search products..."
+                        autoFocus
                     />
 
                     {/* Suggestions list */}
