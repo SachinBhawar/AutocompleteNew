@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import Product from "./components/Product";
 
 function App() {
     const [data, setData] = useState([]);
@@ -8,9 +9,44 @@ function App() {
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [selectedPrompt, setSelectedPrompt] = useState("");
     const [err, setErr] = useState("");
+    const [activeSuggestion, setActiveSuggestion] = useState(-1);
 
+    // Fetch product data from API
+    const fetchData = async () => {
+        try {
+            const fetchedData = await fetch("https://dummyjson.com/products");
+            const fetchedDataJson = await fetchedData.json();
+            setData(fetchedDataJson.products);
+            setErr("");
+        } catch (error) {
+            setErr("Error occurred: " + error.message);
+        }
+    };
+
+    // Handle input change
+    const handleInput = (e) => {
+        setInput(e.target.value);
+    };
+
+    // Handle keyboard navigation in suggestions
+    const handleKeyDown = (e) => {
+        if (keywords.length === 0) return;
+
+        if (e.key === "ArrowDown") {
+            setActiveSuggestion((prev) => (prev < keywords.length - 1 ? prev + 1 : 0));
+        } else if (e.key === "ArrowUp") {
+            setActiveSuggestion((prev) => (prev > 0 ? prev - 1 : keywords.length - 1));
+        } else if (e.key === "Enter") {
+            if (activeSuggestion >= 0 && activeSuggestion < keywords.length) {
+                setSelectedPrompt(keywords[activeSuggestion]);
+                setInput(keywords[activeSuggestion]);
+                setActiveSuggestion(-1);
+            }
+        }
+    };
+
+    // Get keyword suggestions based on input
     function getSearchTextResults(products, prompt) {
-        console.log(typeof prompt);
         const searchTextLower = prompt.toLowerCase();
         const searchTextResults = new Set();
 
@@ -36,6 +72,7 @@ function App() {
         return Array.from(searchTextResults);
     }
 
+    // Get filtered products based on selected keyword
     function getFilteredProducts(productsArr, prompt) {
         const promptLower = prompt.toLowerCase();
         return productsArr.filter((product) => {
@@ -57,25 +94,12 @@ function App() {
         });
     }
 
-    const fetchData = async () => {
-        try {
-            const fetchedData = await fetch("https://dummyjson.com/products");
-            const fetchedDataJson = await fetchedData.json();
-            setData(fetchedDataJson.products);
-            setErr("");
-        } catch (error) {
-            setErr("Error occurred: " + error.message);
-        }
-    };
-
-    const handleInput = (e) => {
-        setInput(e.target.value);
-    };
-
+    // Fetch data on mount
     useEffect(() => {
         fetchData();
     }, []);
 
+    // Update suggestions when input or data changes
     useEffect(() => {
         if (input === "") {
             setFilteredProducts([]);
@@ -87,6 +111,7 @@ function App() {
         }
     }, [input, data]);
 
+    // Update filtered products when selected suggestion changes
     useEffect(() => {
         if (!selectedPrompt) {
             setFilteredProducts([]);
@@ -96,6 +121,11 @@ function App() {
         setFilteredProducts(productsFiltered);
         setKeywords([]);
     }, [selectedPrompt, data]);
+
+    // Reset active suggestion when input or keywords change
+    useEffect(() => {
+        setActiveSuggestion(-1);
+    }, [input, keywords]);
 
     return (
         <div className="flex flex-col items-center">
@@ -110,14 +140,15 @@ function App() {
                         className="p-2 w-full border-1"
                         value={input}
                         onChange={handleInput}
+                        onKeyDown={handleKeyDown}
                         placeholder="Search products..."
                     />
 
-                    {/* suggestions list */}
+                    {/* Suggestions list */}
                     {input !== "" && (
                         <div
                             className="flex flex-col w-full p-2 max-h-[400px] overflow-y-auto bg-white shadow"
-                            style={{ display: keywords.length == 0 ? "none" : "flex" }}
+                            style={{ display: keywords.length === 0 ? "none" : "flex" }}
                         >
                             {keywords
                                 .filter((keyword) => keyword.toLowerCase().includes(input.toLowerCase()))
@@ -127,8 +158,16 @@ function App() {
                                     return (
                                         <div
                                             key={ind}
-                                            className="w-full p-2 hover:bg-green-700 hover:text-white cursor-pointer"
-                                            onClick={() => setSelectedPrompt(keyword)}
+                                            className={`w-full p-2 cursor-pointer ${
+                                                activeSuggestion === ind
+                                                    ? "bg-green-700 text-white"
+                                                    : "hover:bg-green-700 hover:text-white"
+                                            }`}
+                                            onClick={() => {
+                                                setSelectedPrompt(keyword);
+                                                setInput(keyword);
+                                                setActiveSuggestion(-1);
+                                            }}
                                         >
                                             {keywordSplits.map((part, key) =>
                                                 part.toLowerCase() === input.toLowerCase() ? (
@@ -145,27 +184,13 @@ function App() {
                         </div>
                     )}
 
-                    {/* filtered products with images */}
+                    {/* Filtered products with images */}
                     {selectedPrompt && filteredProducts.length > 0 && (
                         <div className="mt-4 w-screen flex flex-col items-center">
                             <h2 className="text-xl font-semibold mb-2">Filtered Products:</h2>
                             <div className="flex flex-row w-full p-8 justify-between flex-wrap">
                                 {filteredProducts.map((product) => (
-                                    <div
-                                        key={product.id}
-                                        className="mb-4 flex flex-col w-60 items-center border-1 p-4 bg-sky-100 rounded-2xl"
-                                    >
-                                        <img
-                                            src={product.thumbnail || (product.images && product.images[0])}
-                                            alt={product.title}
-                                            className="w-24 h-24 object-cover rounded mr-4 border bg-white"
-                                        />
-                                        <div>
-                                            <div className="font-bold">{product.title}</div>
-                                            <div className="text-gray-600">{product.brand}</div>
-                                            <div className="text-gray-400">$ {product.price}</div>
-                                        </div>
-                                    </div>
+                                    <Product product={product} key={product.id} />
                                 ))}
                             </div>
                         </div>
