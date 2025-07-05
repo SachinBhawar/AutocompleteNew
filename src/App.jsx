@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./App.css";
 import Product from "./components/Product";
 
@@ -10,6 +10,9 @@ function App() {
     const [selectedPrompt, setSelectedPrompt] = useState("");
     const [err, setErr] = useState("");
     const [activeSuggestion, setActiveSuggestion] = useState(-1);
+
+    // Refs for each suggestion
+    const suggestionRefs = useRef([]);
 
     // Fetch product data from API
     const fetchData = async () => {
@@ -127,6 +130,16 @@ function App() {
         setActiveSuggestion(-1);
     }, [input, keywords]);
 
+    // Scroll to active suggestion when it changes
+    useEffect(() => {
+        if (activeSuggestion >= 0 && suggestionRefs.current[activeSuggestion]) {
+            suggestionRefs.current[activeSuggestion].scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            });
+        }
+    }, [activeSuggestion, keywords]);
+
     return (
         <div className="flex flex-col items-center">
             <h1 className="text-4xl font-bold mt-8 mb-4">Autocomplete</h1>
@@ -158,6 +171,7 @@ function App() {
                                     return (
                                         <div
                                             key={ind}
+                                            ref={(el) => (suggestionRefs.current[ind] = el)}
                                             className={`w-full p-2 cursor-pointer ${
                                                 activeSuggestion === ind
                                                     ? "bg-green-700 text-white"
