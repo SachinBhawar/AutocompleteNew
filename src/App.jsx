@@ -14,18 +14,6 @@ function App() {
     // Refs for each suggestion
     const suggestionRefs = useRef([]);
 
-    // Fetch product data from API
-    const fetchData = async () => {
-        try {
-            const fetchedData = await fetch("https://dummyjson.com/products");
-            const fetchedDataJson = await fetchedData.json();
-            setData(fetchedDataJson.products);
-            setErr("");
-        } catch (error) {
-            setErr("Error occurred: " + error.message);
-        }
-    };
-
     // Handle input change
     const handleInput = (e) => {
         setInput(e.target.value);
@@ -45,6 +33,61 @@ function App() {
                 setInput(keywords[activeSuggestion]);
                 setActiveSuggestion(-1);
             }
+        }
+    };
+
+    // Fetch data on mount
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    // Update suggestions when input or data changes
+    useEffect(() => {
+        if (input === "") {
+            setFilteredProducts([]);
+            setSelectedPrompt("");
+            setKeywords([]);
+        } else {
+            const suggestions = getSearchTextResults(data, input);
+            setKeywords(suggestions);
+        }
+    }, [input, data]);
+
+    // Update filtered products when selected suggestion changes
+    useEffect(() => {
+        if (!selectedPrompt) {
+            setFilteredProducts([]);
+            return;
+        }
+        const productsFiltered = getFilteredProducts(data, selectedPrompt);
+        setFilteredProducts(productsFiltered);
+        setKeywords([]);
+    }, [selectedPrompt, data]);
+
+    // Reset active suggestion when input or keywords change
+    useEffect(() => {
+        setActiveSuggestion(-1);
+    }, [input, keywords]);
+
+    // Scroll to active suggestion when it changes
+    useEffect(() => {
+        if (activeSuggestion >= 0 && suggestionRefs.current[activeSuggestion]) {
+            suggestionRefs.current[activeSuggestion].scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            });
+        }
+    }, [activeSuggestion, keywords]);
+
+    // Fetch product data from API
+    const fetchData = async () => {
+        try {
+            const fetchedData = await fetch("https://dummyjson.com/products");
+            const fetchedDataJson = await fetchedData.json();
+            setData(fetchedDataJson.products);
+            setErr("");
+        } catch (error) {
+            setErr("Error occurred: " + error.message);
         }
     };
 
@@ -96,49 +139,6 @@ function App() {
             return false;
         });
     }
-
-    // Fetch data on mount
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    // Update suggestions when input or data changes
-    useEffect(() => {
-        if (input === "") {
-            setFilteredProducts([]);
-            setSelectedPrompt("");
-            setKeywords([]);
-        } else {
-            const suggestions = getSearchTextResults(data, input);
-            setKeywords(suggestions);
-        }
-    }, [input, data]);
-
-    // Update filtered products when selected suggestion changes
-    useEffect(() => {
-        if (!selectedPrompt) {
-            setFilteredProducts([]);
-            return;
-        }
-        const productsFiltered = getFilteredProducts(data, selectedPrompt);
-        setFilteredProducts(productsFiltered);
-        setKeywords([]);
-    }, [selectedPrompt, data]);
-
-    // Reset active suggestion when input or keywords change
-    useEffect(() => {
-        setActiveSuggestion(-1);
-    }, [input, keywords]);
-
-    // Scroll to active suggestion when it changes
-    useEffect(() => {
-        if (activeSuggestion >= 0 && suggestionRefs.current[activeSuggestion]) {
-            suggestionRefs.current[activeSuggestion].scrollIntoView({
-                behavior: "smooth",
-                block: "nearest",
-            });
-        }
-    }, [activeSuggestion, keywords]);
 
     return (
         <div className="flex flex-col items-center">
